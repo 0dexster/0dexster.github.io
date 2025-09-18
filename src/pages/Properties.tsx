@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Bed, Bath, Square, Search, SlidersHorizontal, Star, Crown, Building, Home } from "lucide-react";
-import { Link } from "react-router-dom";
+import { MapPin, Bed, Bath, Square, Search, SlidersHorizontal, Star, Crown, Building, Home, ArrowLeft } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import luxuryApartment from "@/assets/luxury-apartment-optimized.webp";
@@ -15,6 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const Properties = () => {
   const { t } = useLanguage();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchFilters, setSearchFilters] = useState({
@@ -26,6 +27,79 @@ const Properties = () => {
     rooms: "",
     area: ""
   });
+
+  // Get context from URL parameters
+  const sourceParam = searchParams.get('source');
+  const categoryParam = searchParams.get('category');
+  const lifestyleParam = searchParams.get('lifestyle');
+  const locationParam = searchParams.get('location');
+  const filtersParam = searchParams.get('filters');
+
+  // Auto-fill search filters based on URL parameters
+  useEffect(() => {
+    if (sourceParam && !searchFilters.location && !searchFilters.type) {
+      const newFilters = { ...searchFilters };
+      
+      // Set default filters based on source context
+      switch (sourceParam) {
+        case 'lifestyle':
+          if (categoryParam) {
+            // Set filters based on lifestyle category
+            switch (categoryParam) {
+              case 'luxury':
+                newFilters.priceRange = "3000000+";
+                newFilters.type = "penthouse";
+                break;
+              case 'family':
+                newFilters.rooms = "3";
+                newFilters.type = "apartment";
+                break;
+              case 'business':
+                newFilters.location = "centrum";
+                newFilters.type = "apartment";
+                break;
+              case 'active':
+                newFilters.location = "podgórze";
+                newFilters.type = "apartment";
+                break;
+              case 'eco':
+                newFilters.type = "house";
+                break;
+              case 'urban':
+                newFilters.location = "stare miasto";
+                newFilters.type = "loft";
+                break;
+            }
+          }
+          break;
+        case 'investment-search':
+          newFilters.priceRange = "1000000-3000000";
+          setIsExpanded(true);
+          break;
+        case 'location-search':
+          if (locationParam) {
+            newFilters.location = locationParam;
+          }
+          setIsExpanded(true);
+          break;
+      }
+      
+      setSearchFilters(newFilters);
+    }
+  }, [sourceParam, categoryParam, lifestyleParam, locationParam]);
+
+  // Get breadcrumb info based on source
+  const getBreadcrumbInfo = () => {
+    const sourceMap = {
+      'lifestyle': { label: 'Wyszukiwanie według stylu życia', path: '/inwestycje/szukaj#lifestyle' },
+      'investment-search': { label: 'Wyszukiwanie inwestycji', path: '/inwestycje/szukaj' },
+      'location-search': { label: 'Wyszukiwanie według lokalizacji', path: '/inwestycje/szukaj#location' }
+    };
+    
+    return sourceMap[sourceParam as keyof typeof sourceMap];
+  };
+
+  const breadcrumbInfo = getBreadcrumbInfo();
 
   const properties = [
     {
@@ -132,6 +206,56 @@ const Properties = () => {
       <Header />
       
       <main className="pt-24">
+        {/* Breadcrumbs and Back Button */}
+        {breadcrumbInfo && (
+          <section className="py-4 bg-luxury-light/50">
+            <div className="container mx-auto px-4">
+              <nav className="flex items-center space-x-2 text-sm text-luxury-gray mb-2">
+                <Link to="/" className="hover:text-luxury-gold transition-colors">
+                  Strona główna
+                </Link>
+                <span>/</span>
+                <Link to={breadcrumbInfo.path} className="hover:text-luxury-gold transition-colors">
+                  {breadcrumbInfo.label}
+                </Link>
+                <span>/</span>
+                <span className="text-luxury-charcoal font-medium">Nieruchomości</span>
+              </nav>
+              <Link 
+                to={breadcrumbInfo.path} 
+                className="inline-flex items-center text-luxury-gray hover:text-luxury-gold transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Powrót do: {breadcrumbInfo.label}
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* Context Banner */}
+        {(sourceParam || categoryParam || lifestyleParam) && (
+          <section className="py-4 bg-gradient-to-r from-luxury-gold/10 to-luxury-charcoal/10">
+            <div className="container mx-auto px-4 text-center">
+              <div className="inline-flex items-center px-4 py-2 bg-white border border-luxury-gold/30 rounded-full shadow-sm">
+                <span className="text-sm text-luxury-charcoal">
+                  {sourceParam === 'lifestyle' && lifestyleParam && (
+                    <>Wyniki dla stylu życia: <strong>{lifestyleParam}</strong></>
+                  )}
+                  {sourceParam === 'investment-search' && (
+                    <>Wyniki wyszukiwania inwestycji - <strong>filtry automatycznie uzupełnione</strong></>
+                  )}
+                  {sourceParam === 'location-search' && locationParam && (
+                    <>Wyniki dla lokalizacji: <strong>{locationParam}</strong></>
+                  )}
+                  {!sourceParam && categoryParam && (
+                    <>Kategoria: <strong>{categoryParam}</strong></>
+                  )}
+                </span>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Hero Section */}
         <section className="py-16 bg-luxury-light">
           <div className="container mx-auto px-4">

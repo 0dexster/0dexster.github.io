@@ -264,7 +264,7 @@ const InvestmentSearch = () => {
                           </div>
                         </div>
                         <div className="mt-4">
-                            <Link to="/nieruchomosci">
+                            <Link to="/nieruchomosci?source=investment-search&category=investment&filters=main">
                               <Button className="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-charcoal">
                                 <Search className="w-4 h-4 mr-2" />
                                 {t('investment.search.button')}
@@ -311,7 +311,7 @@ const InvestmentSearch = () => {
                                 <div className="text-sm text-luxury-gray">
                                   Ukończenie: {investment.completion}
                                 </div>
-                                <Link to="/nieruchomosci">
+                                <Link to={`/konsultacja?category=inwestycje&source=investment&property=${investment.name}`}>
                                   <Button className="w-full mt-4 bg-luxury-charcoal hover:bg-luxury-gold hover:text-luxury-charcoal">{t('investment.new.view_details')}</Button>
                                 </Link>
                               </div>
@@ -365,7 +365,7 @@ const InvestmentSearch = () => {
                                   <p className="text-luxury-gold font-medium">{lifestyle.priceRange}</p>
                                 </div>
 
-                                <Link to="/nieruchomosci">
+                                <Link to={`/nieruchomosci?source=lifestyle&category=${lifestyle.id}&lifestyle=${lifestyle.title}`}>
                                   <Button className="w-full bg-luxury-charcoal hover:bg-luxury-gold hover:text-luxury-charcoal">
                                     {t('lifestyle.view_offers')}
                                   </Button>
@@ -435,7 +435,7 @@ const InvestmentSearch = () => {
                             </Select>
                           </div>
                           <div className="flex items-end">
-                            <Link to="/nieruchomosci">
+                            <Link to="/nieruchomosci?source=location-search&category=location&filters=location">
                               <Button className="w-full bg-luxury-gold hover:bg-luxury-gold-dark text-luxury-charcoal">
                                 <Search className="w-4 h-4 mr-2" />
                                 {t('investment.location.search.button')}
@@ -490,7 +490,7 @@ const InvestmentSearch = () => {
                                 </div>
 
                                 <div className="flex gap-2">
-                                  <Link to="/lokalizacja">
+                                  <Link to={`/konsultacja?category=lokalizacja&source=location&location=${location.city}&district=${location.district}`}>
                                     <Button className="flex-1 bg-luxury-charcoal hover:bg-luxury-gold hover:text-luxury-charcoal">{t('investment.location.view_projects')}</Button>
                                   </Link>
                                   <Button 
